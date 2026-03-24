@@ -28,6 +28,16 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# sensitive data files (password hashes, visitor data)
+src/data/auth.json
+src/data/events.json
+
+# uploaded photos (too large for git)
+public/photos/
+
+# runtime storage (events, auth, generated employees file, uploaded photos)
+storage/
+
 # vercel
 .vercel
 

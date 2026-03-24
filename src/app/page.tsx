@@ -1,101 +1,120 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getEmployees } from "@/lib/employees";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const employees = getEmployees();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Header */}
+      <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-bold text-accent">m</span>
+            <span className="text-2xl font-bold text-gray-900">pool</span>
+            <span className="text-gray-400 text-xs tracking-[0.2em] ml-2">consulting</span>
+          </div>
+          <Link
+            href="/admin"
+            className="text-xs text-gray-400 hover:text-primary transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Admin
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      {/* Hero */}
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-8 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/5 rounded-full text-primary text-xs font-medium mb-6">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          Digitale Visitenkarten
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+          Unser Team
+        </h1>
+        <p className="text-gray-500 max-w-md mx-auto">
+          Scannen Sie den QR-Code oder wählen Sie einen Kontakt, um die digitale Visitenkarte zu öffnen.
+        </p>
+      </section>
+
+      {/* Team Grid */}
+      <section className="max-w-6xl mx-auto px-6 pb-20">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {employees.map((emp) => (
+            <Link
+              key={emp.slug}
+              href={`/card/${emp.slug}`}
+              className="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+            >
+              <div className="flex items-center gap-4">
+                {/* Avatar */}
+                <div className="relative">
+                  {emp.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={emp.photo}
+                      alt={emp.name}
+                      className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100 group-hover:ring-primary/20 transition-all"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-lg ring-2 ring-gray-100 group-hover:ring-primary/20 transition-all">
+                      {emp.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </div>
+                  )}
+                  {/* Online-Punkt */}
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 rounded-full border-2 border-white" />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                    {emp.name}
+                  </h2>
+                  <p className="text-sm text-gray-500 truncate">{emp.role}</p>
+                </div>
+
+                {/* Arrow */}
+                <svg
+                  className="w-5 h-5 text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+
+              {/* Subtle bottom detail */}
+              {emp.email && (
+                <p className="text-xs text-gray-400 mt-3 pl-[4.5rem] truncate">
+                  {emp.email}
+                </p>
+              )}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-100 py-8">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold text-accent">m</span>
+            <span className="text-lg font-bold text-gray-900">pool</span>
+            <span className="text-gray-400 text-xs tracking-[0.15em] ml-1.5">consulting</span>
+          </div>
+          <p className="text-xs text-gray-400">
+            © {new Date().getFullYear()} mpool consulting · Alle Rechte vorbehalten
+          </p>
+        </div>
       </footer>
-    </div>
+    </main>
   );
 }
