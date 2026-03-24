@@ -20,7 +20,7 @@ const LOGO_SVG_CENTERED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
 </svg>`;
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { slug: string } }
 ) {
   const employee = getEmployee(params.slug);
@@ -28,7 +28,14 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const requestUrl = new URL(req.url);
+  const forwardedProto = req.headers.get("x-forwarded-proto");
+  const forwardedHost =
+    req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  const baseUrl =
+    forwardedProto && forwardedHost
+      ? `${forwardedProto}://${forwardedHost}`
+      : process.env.NEXT_PUBLIC_BASE_URL || requestUrl.origin;
   const url = `${baseUrl}/card/${employee.slug}`;
 
   // Generate QR code with high error correction (needed for logo overlay)
