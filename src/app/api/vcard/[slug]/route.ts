@@ -6,7 +6,7 @@ export async function GET(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
-  const employee = getEmployee(params.slug);
+  const employee = await getEmployee(params.slug);
   if (!employee) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

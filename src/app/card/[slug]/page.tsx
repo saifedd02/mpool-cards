@@ -1,4 +1,4 @@
-import { getEmployee, getEmployees, defaultCustomDesign } from "@/lib/employees";
+import { getEmployee, defaultCustomDesign } from "@/lib/employees";
 import { notFound } from "next/navigation";
 import ClassicCard from "./designs/ClassicCard";
 import MinimalCard from "./designs/MinimalCard";
@@ -8,12 +8,8 @@ import CustomCard from "./designs/CustomCard";
 
 export const dynamic = "force-dynamic";
 
-export function generateStaticParams() {
-  return getEmployees().map((e) => ({ slug: e.slug }));
-}
-
-export default function CardPage({ params }: { params: { slug: string } }) {
-  const employee = getEmployee(params.slug);
+export default async function CardPage({ params }: { params: { slug: string } }) {
+  const employee = await getEmployee(params.slug);
   if (!employee) notFound();
 
   const design = employee.design || "classic";

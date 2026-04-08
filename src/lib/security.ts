@@ -30,8 +30,8 @@ function getClientIp(req: Request): string {
   );
 }
 
-export function requireAdminSession(req: Request): NextResponse | null {
-  if (isAdminAuthenticated(req)) {
+export async function requireAdminSession(req: Request): Promise<NextResponse | null> {
+  if (await isAdminAuthenticated(req)) {
     return null;
   }
 

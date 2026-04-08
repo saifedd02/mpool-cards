@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import path from "path";
 import sharp from "sharp";
 import { noStoreHeaders, requireAdminSession } from "@/lib/security";
-import { storagePaths, writeBufferAtomically } from "@/lib/storage";
+import { uploadPhoto } from "@/lib/storage";
 import { sanitizeLine, slugify } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +10,7 @@ const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIZE = 5 * 1024 * 1024;
 
 export async function POST(req: Request) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
@@ -60,10 +59,10 @@ export async function POST(req: Request) {
       .toBuffer();
 
     const filename = `${slug}-${Date.now()}.webp`;
-    writeBufferAtomically(path.join(storagePaths.uploadsDir, filename), optimized);
+    const blobUrl = await uploadPhoto(filename, optimized, "image/webp");
 
     return NextResponse.json(
-      { url: `/media/${filename}` },
+      { url: blobUrl },
       { headers: noStoreHeaders }
     );
   } catch {

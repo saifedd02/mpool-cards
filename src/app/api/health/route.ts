@@ -1,25 +1,25 @@
 import { NextResponse } from "next/server";
-import { existsSync } from "fs";
-import { ensureStorageLayout, storagePaths } from "@/lib/storage";
+import { getEmployees } from "@/lib/employees";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
-  ensureStorageLayout();
-
+export async function GET() {
   const checks = {
     status: "ok" as "ok" | "degraded",
-    employeesSource:
-      existsSync(storagePaths.employees) ? "runtime" : "seed",
-    employeesAvailable:
-      existsSync(storagePaths.employees) || existsSync(storagePaths.legacyEmployees),
-    photosDir: existsSync(storagePaths.uploadsDir),
     sessionSecretConfigured: Boolean(process.env.SESSION_SECRET),
-    storageDir: existsSync(storagePaths.root),
+    blobTokenConfigured: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
     timestamp: new Date().toISOString(),
+    employeesAvailable: false,
   };
 
-  if (!checks.storageDir || !checks.employeesAvailable || !checks.sessionSecretConfigured) {
+  try {
+    const employees = await getEmployees();
+    checks.employeesAvailable = employees.length > 0;
+  } catch {
+    checks.employeesAvailable = false;
+  }
+
+  if (!checks.sessionSecretConfigured || !checks.blobTokenConfigured || !checks.employeesAvailable) {
     checks.status = "degraded";
   }
 

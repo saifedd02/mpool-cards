@@ -13,7 +13,7 @@ import {
 import { noStoreHeaders, requireAdminSession } from "@/lib/security";
 
 export async function GET(req: Request) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
@@ -26,10 +26,10 @@ export async function GET(req: Request) {
     | "year"
     | "all";
   const format = searchParams.get("format");
-  const events = getEventsByTimeframe(timeframe);
+  const events = await getEventsByTimeframe(timeframe);
 
   if (format === "csv") {
-    const csv = exportCSV(getEvents());
+    const csv = exportCSV(await getEvents());
     return new Response(csv, {
       headers: {
         ...noStoreHeaders,
@@ -39,11 +39,13 @@ export async function GET(req: Request) {
     });
   }
 
-  const employees = getEmployees();
+  const employees = await getEmployees();
   const employeeNames: Record<string, string> = {};
   for (const employee of employees) {
     employeeNames[employee.slug] = employee.name;
   }
+
+  const allEvents = await getEvents();
 
   return NextResponse.json(
     {
@@ -51,8 +53,8 @@ export async function GET(req: Request) {
       employeeStats: calcEmployeeStats(events, employeeNames),
       recentVisitors: getRecentVisitors(events, 20),
       returningVisitors: getReturningVisitors(events),
-      stats: calcStats(getEvents()),
-      totalEvents: getEvents().length,
+      stats: calcStats(allEvents),
+      totalEvents: allEvents.length,
       uniqueVisitors: getUniqueVisitors(events),
     },
     { headers: noStoreHeaders }

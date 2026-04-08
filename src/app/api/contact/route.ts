@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const employee = getEmployee(employeeSlug);
+  const employee = await getEmployee(employeeSlug);
   if (!employee) {
     return NextResponse.json(
       { error: "Mitarbeiter nicht gefunden" },
@@ -149,7 +149,7 @@ export async function POST(req: Request) {
     errors.push("employee");
   }
 
-  addEvent({
+  await addEvent({
     employeeSlug,
     message,
     visitorEmail,

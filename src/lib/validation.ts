@@ -95,15 +95,17 @@ export function normalizeHttpsUrl(
 }
 
 export function normalizePhotoUrl(value: unknown): string | null {
-  const raw = sanitizeLine(value, 300);
+  const raw = sanitizeLine(value, 500);
   if (!raw) {
     return "";
   }
 
+  // Local path (legacy)
   if (raw.startsWith("/")) {
     return photoPathPattern.test(raw) ? raw : null;
   }
 
+  // Vercel Blob URLs or other https URLs
   return normalizeHttpsUrl(raw);
 }
 

@@ -7,7 +7,7 @@ export async function PUT(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
@@ -22,7 +22,7 @@ export async function PUT(
     );
   }
 
-  const employees = getEmployees();
+  const employees = await getEmployees();
   const index = employees.findIndex((employee) => employee.slug === params.slug);
 
   if (index === -1) {
@@ -42,7 +42,7 @@ export async function PUT(
   }
 
   employees[index] = updatedEmployee;
-  saveEmployees(employees);
+  await saveEmployees(employees);
 
   return NextResponse.json(updatedEmployee, { headers: noStoreHeaders });
 }
@@ -51,12 +51,12 @@ export async function DELETE(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
 
-  const employees = getEmployees();
+  const employees = await getEmployees();
   const filtered = employees.filter((employee) => employee.slug !== params.slug);
 
   if (filtered.length === employees.length) {
@@ -66,7 +66,7 @@ export async function DELETE(
     );
   }
 
-  saveEmployees(filtered);
+  await saveEmployees(filtered);
 
   return NextResponse.json(
     { success: true },

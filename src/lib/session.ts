@@ -41,8 +41,8 @@ function getCookieValue(req: Request, name: string): string | null {
   return null;
 }
 
-function createSessionToken(): string | null {
-  const secret = getSessionSecret();
+async function createSessionToken(): Promise<string | null> {
+  const secret = await getSessionSecret();
   if (!secret) {
     return null;
   }
@@ -56,13 +56,13 @@ function createSessionToken(): string | null {
   return `${encodedPayload}.${sign(encodedPayload, secret)}`;
 }
 
-function verifySessionToken(token: string | null): boolean {
+async function verifySessionToken(token: string | null): Promise<boolean> {
   if (!token) {
     return false;
   }
 
   const [encodedPayload, signature] = token.split(".");
-  const secret = getSessionSecret();
+  const secret = await getSessionSecret();
 
   if (!encodedPayload || !signature || !secret) {
     return false;
@@ -94,12 +94,12 @@ function sessionCookieOptions(maxAge: number) {
   };
 }
 
-export function isAdminAuthenticated(req: Request): boolean {
+export async function isAdminAuthenticated(req: Request): Promise<boolean> {
   return verifySessionToken(getCookieValue(req, ADMIN_SESSION_COOKIE));
 }
 
-export function withAdminSession(response: NextResponse): NextResponse {
-  const token = createSessionToken();
+export async function withAdminSession(response: NextResponse): Promise<NextResponse> {
+  const token = await createSessionToken();
 
   if (token) {
     response.cookies.set(

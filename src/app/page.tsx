@@ -3,8 +3,8 @@ import { getEmployees } from "@/lib/employees";
 
 export const dynamic = "force-dynamic";
 
-export default function Home() {
-  const employees = getEmployees();
+export default async function Home() {
+  const employees = await getEmployees();
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">

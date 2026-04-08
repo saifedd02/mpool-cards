@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { readJsonWithFallback, storagePaths, writeJsonAtomically } from "./storage";
+import { readJson, storagePaths, writeJson } from "./storage";
 
 export interface ContactEvent {
   id: string;
@@ -11,32 +11,28 @@ export interface ContactEvent {
   message: string;
 }
 
-export function getEvents(): ContactEvent[] {
-  return readJsonWithFallback<ContactEvent[]>(
-    storagePaths.events,
-    [storagePaths.legacyEvents],
-    []
-  );
+export async function getEvents(): Promise<ContactEvent[]> {
+  return readJson<ContactEvent[]>(storagePaths.events, []);
 }
 
-export function addEvent(
+export async function addEvent(
   data: Omit<ContactEvent, "id" | "timestamp">
-): ContactEvent {
-  const events = getEvents();
+): Promise<ContactEvent> {
+  const events = await getEvents();
   const event: ContactEvent = {
     id: randomUUID(),
     timestamp: new Date().toISOString(),
     ...data,
   };
   events.push(event);
-  writeJsonAtomically(storagePaths.events, events);
+  await writeJson(storagePaths.events, events);
   return event;
 }
 
-export function getEventsByTimeframe(
+export async function getEventsByTimeframe(
   timeframe: "week" | "month" | "quarter" | "year" | "all"
-): ContactEvent[] {
-  const events = getEvents();
+): Promise<ContactEvent[]> {
+  const events = await getEvents();
   if (timeframe === "all") return events;
 
   const now = new Date();

@@ -1,4 +1,4 @@
-import { readJsonWithFallback, storagePaths, writeJsonAtomically } from "./storage";
+import { readEmployeesWithDefault, storagePaths, writeJson } from "./storage";
 
 export type CardDesign = "classic" | "minimal" | "dark" | "elegant" | "custom";
 
@@ -43,18 +43,15 @@ export interface Employee {
   customDesign?: CustomDesignSettings;
 }
 
-export function getEmployees(): Employee[] {
-  return readJsonWithFallback<Employee[]>(
-    storagePaths.employees,
-    [storagePaths.legacyEmployees],
-    []
-  );
+export async function getEmployees(): Promise<Employee[]> {
+  return readEmployeesWithDefault<Employee[]>([]);
 }
 
-export function getEmployee(slug: string): Employee | undefined {
-  return getEmployees().find((e) => e.slug === slug);
+export async function getEmployee(slug: string): Promise<Employee | undefined> {
+  const employees = await getEmployees();
+  return employees.find((e) => e.slug === slug);
 }
 
-export function saveEmployees(employees: Employee[]): void {
-  writeJsonAtomically(storagePaths.employees, employees);
+export async function saveEmployees(employees: Employee[]): Promise<void> {
+  await writeJson(storagePaths.employees, employees);
 }

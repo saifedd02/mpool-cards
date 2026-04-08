@@ -1,5 +1,5 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { readJsonWithFallback, storagePaths, writeJsonAtomically } from "./storage";
+import { readJson, storagePaths, writeJson } from "./storage";
 
 const HASH_BYTES = 64;
 
@@ -10,16 +10,12 @@ interface AuthData {
   passwordUpdatedAt?: string;
 }
 
-function readAuthData(): AuthData {
-  return readJsonWithFallback<AuthData>(
-    storagePaths.auth,
-    [storagePaths.legacyAuth],
-    {}
-  );
+async function readAuthData(): Promise<AuthData> {
+  return readJson<AuthData>(storagePaths.auth, {});
 }
 
-function writeAuthData(data: AuthData): void {
-  writeJsonAtomically(storagePaths.auth, data);
+async function writeAuthData(data: AuthData): Promise<void> {
+  await writeJson(storagePaths.auth, data);
 }
 
 function hashPassword(password: string, salt: string): string {
@@ -37,8 +33,8 @@ function safeCompare(a: string, b: string): boolean {
   return timingSafeEqual(left, right);
 }
 
-function getConfiguredPassword(): AuthData {
-  const data = readAuthData();
+async function getConfiguredPassword(): Promise<AuthData> {
+  const data = await readAuthData();
 
   if (data.passwordHash && data.passwordSalt) {
     return data;
@@ -55,13 +51,13 @@ function getConfiguredPassword(): AuthData {
   return {};
 }
 
-export function isPasswordConfigured(): boolean {
-  const data = getConfiguredPassword();
+export async function isPasswordConfigured(): Promise<boolean> {
+  const data = await getConfiguredPassword();
   return Boolean(data.passwordHash || data.password);
 }
 
-export function verifyPassword(password: string): boolean {
-  const data = getConfiguredPassword();
+export async function verifyPassword(password: string): Promise<boolean> {
+  const data = await getConfiguredPassword();
 
   if (data.passwordHash && data.passwordSalt) {
     return safeCompare(hashPassword(password, data.passwordSalt), data.passwordHash);
@@ -75,28 +71,28 @@ export function verifyPassword(password: string): boolean {
 
   // Legacy plaintext values are migrated to a salted hash after a successful login.
   if (matches) {
-    const fileData = readAuthData();
+    const fileData = await readAuthData();
     if (fileData.password && !fileData.passwordHash) {
-      setPassword(password);
+      await setPassword(password);
     }
   }
 
   return matches;
 }
 
-export function setPassword(newPassword: string): void {
+export async function setPassword(newPassword: string): Promise<void> {
   const salt = randomBytes(16).toString("hex");
   const passwordHash = hashPassword(newPassword, salt);
 
-  writeAuthData({
+  await writeAuthData({
     passwordHash,
     passwordSalt: salt,
     passwordUpdatedAt: new Date().toISOString(),
   });
 }
 
-export function getSessionSecret(): string | null {
-  const authData = readAuthData();
+export async function getSessionSecret(): Promise<string | null> {
+  const authData = await readAuthData();
   const passwordMaterial =
     authData.passwordHash ||
     authData.password ||

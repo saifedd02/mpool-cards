@@ -1,14 +1,10 @@
-import { getEmployee, getEmployees } from "@/lib/employees";
+import { getEmployee } from "@/lib/employees";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export function generateStaticParams() {
-  return getEmployees().map((e) => ({ slug: e.slug }));
-}
-
-export default function QRPage({ params }: { params: { slug: string } }) {
-  const employee = getEmployee(params.slug);
+export default async function QRPage({ params }: { params: { slug: string } }) {
+  const employee = await getEmployee(params.slug);
   if (!employee) notFound();
 
   return (

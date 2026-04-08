@@ -4,9 +4,9 @@ import { noStoreHeaders, enforceRateLimit, requireAdminSession } from "@/lib/sec
 import { clearAdminSession, isAdminAuthenticated, withAdminSession } from "@/lib/session";
 import { sanitizeLine, validatePasswordStrength } from "@/lib/validation";
 
-export function GET(req: Request) {
+export async function GET(req: Request) {
   return NextResponse.json(
-    { authenticated: isAdminAuthenticated(req) },
+    { authenticated: await isAdminAuthenticated(req) },
     { headers: noStoreHeaders }
   );
 }
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!isPasswordConfigured()) {
+  if (!(await isPasswordConfigured())) {
     return NextResponse.json(
       { error: "Admin-Passwort ist nicht konfiguriert" },
       { headers: noStoreHeaders, status: 503 }
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!verifyPassword(password)) {
+  if (!(await verifyPassword(password))) {
     return NextResponse.json(
       { error: "Falsches Passwort" },
       { headers: noStoreHeaders, status: 401 }
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
@@ -68,7 +68,7 @@ export async function PUT(req: Request) {
   const currentPassword = sanitizeLine(body?.currentPassword, 128);
   const newPassword = sanitizeLine(body?.newPassword, 256);
 
-  if (!verifyPassword(currentPassword)) {
+  if (!(await verifyPassword(currentPassword))) {
     return NextResponse.json(
       { error: "Aktuelles Passwort ist falsch" },
       { headers: noStoreHeaders, status: 400 }
@@ -83,7 +83,7 @@ export async function PUT(req: Request) {
     );
   }
 
-  setPassword(newPassword);
+  await setPassword(newPassword);
 
   return withAdminSession(
     NextResponse.json({ success: true }, { headers: noStoreHeaders })

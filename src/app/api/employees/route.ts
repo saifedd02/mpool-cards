@@ -6,16 +6,16 @@ import { slugify, validateEmployeeInput } from "@/lib/validation";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
 
-  return NextResponse.json(getEmployees(), { headers: noStoreHeaders });
+  return NextResponse.json(await getEmployees(), { headers: noStoreHeaders });
 }
 
 export async function POST(req: Request) {
-  const unauthorized = requireAdminSession(req);
+  const unauthorized = await requireAdminSession(req);
   if (unauthorized) {
     return unauthorized;
   }
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const employees = getEmployees();
+  const employees = await getEmployees();
   const slug = data.slug || slugify(data.name);
 
   if (!slug) {
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
   };
 
   employees.push(newEmployee);
-  saveEmployees(employees);
+  await saveEmployees(employees);
 
   return NextResponse.json(newEmployee, {
     headers: noStoreHeaders,
