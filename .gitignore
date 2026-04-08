@@ -38,6 +38,9 @@ public/photos/
 # runtime storage (events, auth, generated employees file, uploaded photos)
 storage/
 
+# separate projects (not part of this app)
+FörderprogrammFinder1.1/
+
 # vercel
 .vercel
 
