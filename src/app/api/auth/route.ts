@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     );
   }
 
-  return withAdminSession(
+  return await withAdminSession(
     NextResponse.json({ success: true }, { headers: noStoreHeaders })
   );
 }
@@ -85,7 +85,7 @@ export async function PUT(req: Request) {
 
   await setPassword(newPassword);
 
-  return withAdminSession(
+  return await withAdminSession(
     NextResponse.json({ success: true }, { headers: noStoreHeaders })
   );
 }
