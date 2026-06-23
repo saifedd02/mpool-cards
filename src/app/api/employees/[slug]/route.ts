@@ -44,7 +44,13 @@ export async function PUT(
   employees[index] = updatedEmployee;
   await saveEmployees(employees);
 
-  return NextResponse.json(updatedEmployee, { headers: noStoreHeaders });
+  return NextResponse.json(
+    {
+      employee: updatedEmployee,
+      employees,
+    },
+    { headers: noStoreHeaders }
+  );
 }
 
 export async function DELETE(
@@ -69,7 +75,10 @@ export async function DELETE(
   await saveEmployees(filtered);
 
   return NextResponse.json(
-    { success: true },
+    {
+      success: true,
+      employees: filtered,
+    },
     { headers: noStoreHeaders }
   );
 }

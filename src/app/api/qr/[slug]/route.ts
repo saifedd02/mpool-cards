@@ -2,13 +2,7 @@ import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import sharp from "sharp";
 import { getEmployee } from "@/lib/employees";
-
-const LOGO_SVG_CENTERED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 56" width="140" height="56">
-  <rect width="140" height="56" rx="10" fill="#FFFFFF"/>
-  <rect x="2" y="2" width="136" height="52" rx="8" fill="#FFFFFF" stroke="#003087" stroke-width="2.5"/>
-  <text x="14" y="40" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="bold" fill="#0057B8">m</text>
-  <text x="38" y="40" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="bold" fill="#1A1A1A">pool</text>
-</svg>`;
+import { QR_LOGO_PNG_BASE64 } from "./logo";
 
 export async function GET(
   req: Request,
@@ -37,10 +31,10 @@ export async function GET(
     color: { dark: "#003087", light: "#FFFFFF" },
   });
 
-  // Render the logo SVG to PNG
+  // Resize the pre-rendered logo PNG (font-independent, works on serverless)
   const logoWidth = 120;
   const logoHeight = 48;
-  const logoPng = await sharp(Buffer.from(LOGO_SVG_CENTERED))
+  const logoPng = await sharp(Buffer.from(QR_LOGO_PNG_BASE64, "base64"))
     .resize(logoWidth, logoHeight)
     .png()
     .toBuffer();

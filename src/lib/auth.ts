@@ -1,5 +1,6 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { readJson, storagePaths, writeJson } from "./storage";
+import { sanitizeLine } from "./validation";
 
 const HASH_BYTES = 64;
 
@@ -41,11 +42,11 @@ async function getConfiguredPassword(): Promise<AuthData> {
   }
 
   if (data.password) {
-    return data;
+    return { ...data, password: sanitizeLine(data.password, 256) };
   }
 
   if (process.env.ADMIN_PASSWORD) {
-    return { password: process.env.ADMIN_PASSWORD };
+    return { password: sanitizeLine(process.env.ADMIN_PASSWORD, 256) };
   }
 
   return {};

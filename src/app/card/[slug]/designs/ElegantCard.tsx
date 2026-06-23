@@ -1,5 +1,7 @@
 import ContactForm from "../ContactForm";
 import SaveToOutlookButton from "../SaveToOutlookButton";
+import AddToWalletButtons from "@/components/AddToWalletButtons";
+import SaveContactButton from "@/components/SaveContactButton";
 
 interface Props {
   employee: {
@@ -42,7 +44,7 @@ export default function ElegantCard({ employee, preview = false }: Props) {
             {/* Ornamental divider */}
             <div className="flex items-center justify-center gap-3 mt-4">
               <div className="w-10 h-px bg-gradient-to-r from-transparent to-amber-300/60" />
-              <span className="text-[10px] font-semibold tracking-widest text-amber-600/50 uppercase">mpool consulting</span>
+              <span className="text-[10px] font-semibold tracking-widest text-amber-600/50">mpool consulting</span>
               <div className="w-10 h-px bg-gradient-to-l from-transparent to-amber-300/60" />
             </div>
           </div>
@@ -95,10 +97,17 @@ export default function ElegantCard({ employee, preview = false }: Props) {
             <>
               {/* Action buttons */}
               <div className="px-7 pb-3 flex gap-2.5">
-                <a href={`/api/vcard/${employee.slug}`} download={`${employee.name}.vcf`} className="flex-1 text-center bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold text-[13px] transition-colors shadow-sm">
-                  Kontakt speichern
-                </a>
+                <SaveContactButton
+                  slug={employee.slug}
+                  name={employee.name}
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold text-[13px] transition-colors shadow-sm disabled:cursor-not-allowed disabled:opacity-80"
+                />
                 <SaveToOutlookButton slug={employee.slug} name={employee.name} />
+              </div>
+
+              {/* Wallet buttons */}
+              <div className="px-7 pb-1">
+                <AddToWalletButtons slug={employee.slug} />
               </div>
 
               {/* Ornamental divider */}

@@ -65,8 +65,14 @@ export async function POST(req: Request) {
   employees.push(newEmployee);
   await saveEmployees(employees);
 
-  return NextResponse.json(newEmployee, {
+  return NextResponse.json(
+    {
+      employee: newEmployee,
+      employees,
+    },
+    {
     headers: noStoreHeaders,
     status: 201,
-  });
+    }
+  );
 }

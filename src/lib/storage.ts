@@ -119,7 +119,9 @@ export async function readJson<T>(blobKey: string, defaultValue: T): Promise<T> 
   try {
     const blob = await head(blobKey, { token: process.env.BLOB_READ_WRITE_TOKEN });
     if (!blob) return defaultValue;
-    const response = await fetch(blob.url);
+    const url = new URL(blob.url);
+    url.searchParams.set("etag", blob.etag);
+    const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) return defaultValue;
     return (await response.json()) as T;
   } catch {
@@ -131,6 +133,7 @@ export async function writeJson(blobKey: string, data: unknown): Promise<void> {
   await put(blobKey, JSON.stringify(data, null, 2), {
     access: "public",
     addRandomSuffix: false,
+    allowOverwrite: true,
     token: process.env.BLOB_READ_WRITE_TOKEN,
   });
 }

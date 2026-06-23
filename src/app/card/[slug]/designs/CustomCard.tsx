@@ -1,5 +1,7 @@
 import ContactForm from "../ContactForm";
 import SaveToOutlookButton from "../SaveToOutlookButton";
+import AddToWalletButtons from "@/components/AddToWalletButtons";
+import SaveContactButton from "@/components/SaveContactButton";
 
 interface CustomDesignSettings {
   primaryColor: string;
@@ -140,7 +142,7 @@ export default function CustomCard({ employee, preview = false, settings: s }: P
                   <p style={{ color: headerSubColor, marginTop: "4px", fontSize: "13px", fontWeight: 500 }}>
                     {employee.role}
                   </p>
-                  <p style={{ color: isDarkHeader ? "rgba(255,255,255,0.4)" : s.subtextColor, fontSize: "10px", marginTop: "8px", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>
+                  <p style={{ color: isDarkHeader ? "rgba(255,255,255,0.4)" : s.subtextColor, fontSize: "10px", marginTop: "8px", letterSpacing: "0.1em", fontWeight: 600 }}>
                     mpool consulting
                   </p>
                 </div>
@@ -187,7 +189,7 @@ export default function CustomCard({ employee, preview = false, settings: s }: P
                     <p style={{ color: headerSubColor, marginTop: "2px", fontSize: "13px", fontWeight: 500 }}>
                       {employee.role}
                     </p>
-                    <p style={{ color: isDarkHeader ? "rgba(255,255,255,0.4)" : s.subtextColor, fontSize: "10px", marginTop: "6px", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>
+                    <p style={{ color: isDarkHeader ? "rgba(255,255,255,0.4)" : s.subtextColor, fontSize: "10px", marginTop: "6px", letterSpacing: "0.1em", fontWeight: 600 }}>
                       mpool consulting
                     </p>
                   </div>
@@ -235,7 +237,7 @@ export default function CustomCard({ employee, preview = false, settings: s }: P
                   </div>
                   <h1 style={{ fontSize: "20px", fontWeight: 700, color: s.textColor }}>{employee.name}</h1>
                   <p style={{ color: s.subtextColor, marginTop: "4px", fontSize: "13px" }}>{employee.role}</p>
-                  <p style={{ color: s.subtextColor, fontSize: "10px", marginTop: "8px", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, opacity: 0.6 }}>
+                  <p style={{ color: s.subtextColor, fontSize: "10px", marginTop: "8px", letterSpacing: "0.1em", fontWeight: 600, opacity: 0.6 }}>
                     mpool consulting
                   </p>
                 </div>
@@ -276,7 +278,7 @@ export default function CustomCard({ employee, preview = false, settings: s }: P
                   <div>
                     <h1 style={{ fontSize: "18px", fontWeight: 700, color: s.textColor }}>{employee.name}</h1>
                     <p style={{ color: s.subtextColor, marginTop: "2px", fontSize: "13px" }}>{employee.role}</p>
-                    <p style={{ color: s.subtextColor, fontSize: "10px", marginTop: "6px", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, opacity: 0.6 }}>
+                    <p style={{ color: s.subtextColor, fontSize: "10px", marginTop: "6px", letterSpacing: "0.1em", fontWeight: 600, opacity: 0.6 }}>
                       mpool consulting
                     </p>
                   </div>
@@ -356,19 +358,22 @@ export default function CustomCard({ employee, preview = false, settings: s }: P
             <>
               {/* Buttons */}
               <div style={{ padding: "0 24px 12px", display: "flex", gap: "10px" }}>
-                <a
-                  href={`/api/vcard/${employee.slug}`}
-                  download={`${employee.name}.vcf`}
+                <SaveContactButton
+                  slug={employee.slug}
+                  name={employee.name}
+                  label="Kontakt speichern"
                   className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[13px] transition-colors"
                   style={{
                     background: s.primaryColor,
                     color: isColorDark(s.primaryColor) ? "#fff" : "#111",
                   }}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                  Kontakt speichern
-                </a>
+                />
                 <SaveToOutlookButton slug={employee.slug} name={employee.name} />
+              </div>
+
+              {/* Wallet buttons */}
+              <div style={{ padding: "0 24px 4px" }}>
+                <AddToWalletButtons slug={employee.slug} />
               </div>
 
               {/* Divider */}

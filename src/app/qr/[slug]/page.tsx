@@ -1,5 +1,6 @@
 import { getEmployee } from "@/lib/employees";
 import { notFound } from "next/navigation";
+import SaveContactButton from "@/components/SaveContactButton";
 
 export const dynamic = "force-dynamic";
 
@@ -28,13 +29,27 @@ export default async function QRPage({ params }: { params: { slug: string } }) {
           <p className="text-gray-500">{employee.role}</p>
         </div>
 
-        <a
-          href={`/api/qr/${employee.slug}`}
-          download={`qr-${employee.slug}.png`}
-          className="inline-block mt-6 bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-accent transition-colors"
-        >
-          Download QR Code
-        </a>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href={`/api/qr/${employee.slug}`}
+            download={`qr-${employee.slug}.png`}
+            className="inline-flex items-center justify-center bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-accent transition-colors min-w-[220px]"
+          >
+            QR Code herunterladen
+          </a>
+          <SaveContactButton
+            slug={employee.slug}
+            name={employee.name}
+            label="Kontakt fuer iPhone & Android"
+            loadingLabel="Kontakt wird vorbereitet..."
+            className="inline-flex items-center justify-center gap-2 border border-primary text-primary px-6 py-2.5 rounded-lg font-semibold hover:bg-primary/5 transition-colors min-w-[220px] disabled:cursor-not-allowed disabled:opacity-80"
+          />
+        </div>
+
+        <p className="text-xs text-gray-500 mt-3 max-w-md mx-auto">
+          Die Kontakt-Datei funktioniert auf iPhone, Apple Kontakte, Android, Google Kontakte
+          und in den meisten mobilen Kontakt-Apps.
+        </p>
 
         <p className="text-xs text-gray-400 mt-8">
           Scan to view digital business card

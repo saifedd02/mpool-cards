@@ -1,5 +1,7 @@
 import ContactForm from "../ContactForm";
 import SaveToOutlookButton from "../SaveToOutlookButton";
+import AddToWalletButtons from "@/components/AddToWalletButtons";
+import SaveContactButton from "@/components/SaveContactButton";
 
 interface Props {
   employee: {
@@ -34,7 +36,7 @@ export default function MinimalCard({ employee, preview = false }: Props) {
                 <p className="text-gray-500 mt-0.5 text-[13px]">{employee.role}</p>
                 <div className="flex items-center gap-1 mt-2.5">
                   <div className="w-5 h-[2px] bg-accent rounded-full" />
-                  <span className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase">mpool consulting</span>
+                  <span className="text-[10px] font-semibold tracking-widest text-gray-400">mpool consulting</span>
                 </div>
               </div>
             </div>
@@ -71,10 +73,17 @@ export default function MinimalCard({ employee, preview = false }: Props) {
             <>
               {/* Action buttons */}
               <div className="px-7 pb-3 flex gap-2.5">
-                <a href={`/api/vcard/${employee.slug}`} download={`${employee.name}.vcf`} className="flex-1 text-center border-2 border-gray-900 text-gray-900 py-2.5 rounded-xl font-semibold text-[13px] hover:bg-gray-900 hover:text-white transition-all">
-                  Kontakt speichern
-                </a>
+                <SaveContactButton
+                  slug={employee.slug}
+                  name={employee.name}
+                  className="flex-1 flex items-center justify-center gap-2 border-2 border-gray-900 text-gray-900 py-2.5 rounded-xl font-semibold text-[13px] hover:bg-gray-900 hover:text-white transition-all disabled:cursor-not-allowed disabled:opacity-80"
+                />
                 <SaveToOutlookButton slug={employee.slug} name={employee.name} />
+              </div>
+
+              {/* Wallet buttons */}
+              <div className="px-7 pb-1">
+                <AddToWalletButtons slug={employee.slug} />
               </div>
 
               {/* Divider */}

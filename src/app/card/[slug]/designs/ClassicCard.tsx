@@ -1,5 +1,7 @@
 import ContactForm from "../ContactForm";
 import SaveToOutlookButton from "../SaveToOutlookButton";
+import AddToWalletButtons from "@/components/AddToWalletButtons";
+import SaveContactButton from "@/components/SaveContactButton";
 
 interface Props {
   employee: {
@@ -27,7 +29,7 @@ export default function ClassicCard({ employee, preview = false }: Props) {
 
             <div className="relative text-center">
               <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full mb-6">
-                <span className="text-[11px] font-semibold text-blue-200 tracking-widest uppercase">mpool consulting</span>
+                <span className="text-[11px] font-semibold text-blue-200 tracking-widest">mpool consulting</span>
               </div>
               <div className="mb-4">
                 {employee.photo ? (
@@ -93,11 +95,17 @@ export default function ClassicCard({ employee, preview = false }: Props) {
             <>
               {/* Action buttons */}
               <div className="px-5 pt-5 pb-2 flex gap-2.5">
-                <a href={`/api/vcard/${employee.slug}`} download={`${employee.name}.vcf`} className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold text-[13px] transition-colors shadow-sm">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                  Kontakt speichern
-                </a>
+                <SaveContactButton
+                  slug={employee.slug}
+                  name={employee.name}
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold text-[13px] transition-colors shadow-sm disabled:cursor-not-allowed disabled:opacity-80"
+                />
                 <SaveToOutlookButton slug={employee.slug} name={employee.name} />
+              </div>
+
+              {/* Wallet buttons */}
+              <div className="px-5 pb-1">
+                <AddToWalletButtons slug={employee.slug} />
               </div>
 
               {/* Divider */}

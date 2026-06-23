@@ -48,3 +48,8 @@ FörderprogrammFinder1.1/
 *.tsbuildinfo
 next-env.d.ts
 .env.vercel
+
+# certificates / private keys (never commit)
+*.p12
+*.pem
+*.cer

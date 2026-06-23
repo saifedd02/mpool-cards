@@ -6,6 +6,7 @@ import Analytics from "./Analytics";
 import DesignPicker from "./DesignPicker";
 import PhotoUpload from "./PhotoUpload";
 import CustomDesignBuilder from "./CustomDesignBuilder";
+import AddToWalletButtons from "@/components/AddToWalletButtons";
 
 type CardDesign = "classic" | "minimal" | "dark" | "elegant" | "custom";
 
@@ -34,6 +35,13 @@ interface Employee {
   photo: string;
   design?: CardDesign;
   customDesign?: CustomDesignSettings;
+}
+
+interface EmployeeMutationResponse {
+  employee?: Employee;
+  employees?: Employee[];
+  error?: string;
+  success?: boolean;
 }
 
 const defaultCustomDesign: CustomDesignSettings = {
@@ -70,11 +78,14 @@ export default function AdminPage() {
   >("checking");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState<Omit<Employee, "slug">>(emptyEmployee);
   const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
   const [qrSlug, setQrSlug] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("analytics");
   const [pwCurrent, setPwCurrent] = useState("");
@@ -92,7 +103,21 @@ export default function AdminPage() {
     setQrSlug(null);
     setPassword("");
     setFormError("");
+    setIsSaving(false);
+    setSaveSuccessMessage("");
   }, []);
+
+  useEffect(() => {
+    if (!saveSuccessMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSaveSuccessMessage("");
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [saveSuccessMessage]);
 
   const checkSession = useCallback(async () => {
     try {
@@ -132,66 +157,119 @@ export default function AdminPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    if (isLoggingIn) {
+      return;
+    }
+
+    const trimmedPassword = password.trim();
+    if (!trimmedPassword) {
+      setAuthError("Bitte Passwort eingeben");
+      return;
+    }
+
+    setIsLoggingIn(true);
     setAuthError("");
-    const res = await fetch("/api/auth", {
-      cache: "no-store",
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    if (res.ok) {
-      setAuthState("authenticated");
-      setPassword("");
-      fetchEmployees();
-    } else {
+
+    try {
+      const res = await fetch("/api/auth", {
+        cache: "no-store",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: trimmedPassword }),
+      });
       const data = await res.json().catch(() => ({ error: "Anmeldung fehlgeschlagen" }));
+
+      if (!res.ok) {
+        setAuthState("unauthenticated");
+        setAuthError(data.error || "Anmeldung fehlgeschlagen");
+        return;
+      }
+
+      if (data.success) {
+        setAuthState("authenticated");
+        setPassword("");
+        fetchEmployees();
+        return;
+      }
+
       setAuthState("unauthenticated");
       setAuthError(data.error || "Anmeldung fehlgeschlagen");
+    } catch {
+      setAuthState("unauthenticated");
+      setAuthError("Anmeldung fehlgeschlagen");
+    } finally {
+      setIsLoggingIn(false);
     }
   }
 
   async function handleSave() {
+    if (isSaving) {
+      return;
+    }
+
+    const isEditing = Boolean(editing);
     setFormError("");
+    setSaveSuccessMessage("");
+    setIsSaving(true);
     const payload = { ...form };
     if (payload.design !== "custom") {
       delete payload.customDesign;
     }
 
-    if (editing) {
-      const res = await fetch(`/api/employees/${editing}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
+    try {
+      let mutationData: EmployeeMutationResponse = {};
+
+      if (editing) {
+        const res = await fetch(`/api/employees/${editing}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        mutationData = await res.json().catch(
+          () => ({ error: "Speichern fehlgeschlagen" }) satisfies EmployeeMutationResponse
+        );
+        if (!res.ok) {
+          setFormError(mutationData.error || "Speichern fehlgeschlagen");
+          return;
+        }
+      } else {
+        const res = await fetch("/api/employees", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        mutationData = await res.json().catch(
+          () => ({ error: "Anlegen fehlgeschlagen" }) satisfies EmployeeMutationResponse
+        );
+        if (!res.ok) {
+          setFormError(mutationData.error || "Anlegen fehlgeschlagen");
+          return;
+        }
       }
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: "Speichern fehlgeschlagen" }));
-        setFormError(data.error || "Speichern fehlgeschlagen");
-        return;
+
+      if (Array.isArray(mutationData.employees)) {
+        setEmployees(mutationData.employees);
+      } else {
+        await fetchEmployees();
       }
-    } else {
-      const res = await fetch("/api/employees", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
-      }
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: "Anlegen fehlgeschlagen" }));
-        setFormError(data.error || "Anlegen fehlgeschlagen");
-        return;
-      }
+
+      setEditing(null);
+      setAdding(false);
+      setForm(emptyEmployee);
+      setSaveSuccessMessage(
+        isEditing ? "Aenderungen wurden gespeichert." : "Mitarbeiter wurde hinzugefuegt."
+      );
+    } finally {
+      setIsSaving(false);
     }
-    setEditing(null);
-    setAdding(false);
-    setForm(emptyEmployee);
-    fetchEmployees();
   }
 
   async function handleDelete(slug: string) {
@@ -201,13 +279,22 @@ export default function AdminPage() {
       handleUnauthorized();
       return;
     }
-    fetchEmployees();
+    const data = (await res.json().catch(() => ({}))) as EmployeeMutationResponse;
+    if (!res.ok) {
+      return;
+    }
+    if (Array.isArray(data.employees)) {
+      setEmployees(data.employees);
+      return;
+    }
+    await fetchEmployees();
   }
 
   function startEdit(emp: Employee) {
     setEditing(emp.slug);
     setAdding(false);
     setFormError("");
+    setSaveSuccessMessage("");
     setForm({
       name: emp.name,
       role: emp.role,
@@ -225,6 +312,7 @@ export default function AdminPage() {
     setAdding(true);
     setEditing(null);
     setFormError("");
+    setSaveSuccessMessage("");
     setForm(emptyEmployee);
   }
 
@@ -300,8 +388,18 @@ export default function AdminPage() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (authError) {
+                setAuthError("");
+              }
+            }}
             placeholder="Passwort eingeben"
+            autoComplete="current-password"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            required
             className="w-full px-4 py-3 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-center"
           />
           {authError && (
@@ -309,9 +407,10 @@ export default function AdminPage() {
           )}
           <button
             type="submit"
+            disabled={isLoggingIn}
             className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-accent transition-all duration-200 shadow-md hover:shadow-lg"
           >
-            Einloggen
+            {isLoggingIn ? "Wird geprüft..." : "Einloggen"}
           </button>
         </form>
       </main>
@@ -397,18 +496,31 @@ export default function AdminPage() {
             <div className="flex justify-end mb-4">
               <button
                 onClick={startAdd}
+                disabled={isSaving}
                 className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-accent transition-colors"
               >
                 + Mitarbeiter hinzufügen
               </button>
             </div>
 
+            {saveSuccessMessage && (
+              <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                {saveSuccessMessage}
+              </div>
+            )}
+
             {/* Add/Edit Form */}
             {(adding || editing) && (
-              <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+              <div className="relative bg-white rounded-xl shadow-md p-6 mb-8" aria-busy={isSaving}>
                 <h2 className="text-lg font-semibold mb-4">
                   {editing ? "Mitarbeiter bearbeiten" : "Mitarbeiter hinzufügen"}
                 </h2>
+                {isSaving && (
+                  <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-primary">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                    Aenderungen werden gespeichert und direkt uebernommen. Bitte kurz warten...
+                  </div>
+                )}
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input
                     placeholder="Name *"
@@ -507,18 +619,20 @@ export default function AdminPage() {
                 <div className="flex gap-3 mt-4">
                   <button
                     onClick={handleSave}
-                    className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-accent transition-colors"
+                    disabled={isSaving}
+                    className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-accent transition-colors disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {editing ? "Speichern" : "Hinzufügen"}
+                    {isSaving ? "Speichert..." : editing ? "Speichern" : "Hinzufügen"}
                   </button>
                   <button
+                    disabled={isSaving}
                     onClick={() => {
                       setEditing(null);
                       setAdding(false);
                       setFormError("");
                       setForm(emptyEmployee);
                     }}
-                    className="px-6 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+                    className="px-6 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition-colors disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     Abbrechen
                   </button>
@@ -551,6 +665,9 @@ export default function AdminPage() {
                     >
                       Schließen
                     </button>
+                  </div>
+                  <div className="mt-3 flex justify-center">
+                    <AddToWalletButtons slug={qrSlug} compact />
                   </div>
                 </div>
               </div>

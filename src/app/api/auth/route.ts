@@ -45,8 +45,8 @@ export async function POST(req: Request) {
 
   if (!(await verifyPassword(password))) {
     return NextResponse.json(
-      { error: "Falsches Passwort" },
-      { headers: noStoreHeaders, status: 401 }
+      { success: false, error: "Falsches Passwort" },
+      { headers: noStoreHeaders }
     );
   }
 
